@@ -65,19 +65,29 @@ In a microservices setup, centralising authentication has clear benefits:
 
 ## Profiles
 
-Switch profiles via `spring.profiles.active` in `application.properties` or at runtime with `-Dspring.profiles.active=<profile>`.
+Activate with `-P <profile>` on any Maven command, or set `spring.profiles.active` at runtime.
 
-### `h2` (default — development)
+| Profile | DB | `ddl-auto` | Rate limit |
+|---|---|---|---|
+| `dev` (default) | H2 in-memory | `create-drop` | 50 req/60s |
+| `uat` | PostgreSQL `fortknox_uat` | `validate` | 100 req/60s |
+| `prod` | PostgreSQL `fortknox` | `validate` | 100 req/60s |
 
-- In-memory H2 database, schema recreated on every restart (`create-drop`)
+### `dev` (default)
+
+- In-memory H2 database, schema recreated on every restart
 - H2 console available at `http://localhost:8080/h2-console`
-- Rate limit: **50 requests / 60 seconds** per IP
+- `JWT_SECRET` falls back to a hardcoded dev value if not set
 
-### `postgres` (production)
+### `uat`
+
+- PostgreSQL at `localhost:5432/fortknox_uat`
+- `JWT_SECRET`, `DB_USERNAME`, `DB_PASSWORD` configurable via environment variables
+
+### `prod`
 
 - PostgreSQL at `localhost:5432/fortknox`
-- Schema updated on startup (`update`)
-- Rate limit: **100 requests / 60 seconds** per IP
+- `JWT_SECRET`, `DB_USERNAME`, `DB_PASSWORD` **required** as environment variables — no defaults
 
 ---
 
@@ -95,7 +105,7 @@ All values can be overridden per profile in the corresponding `application-<prof
 
 ### Rate Limiting
 
-| Property | Default (h2) | Default (postgres) | Description |
+| Property | Default (dev) | Default (uat/prod) | Description |
 |---|---|---|---|
 | `rate-limit.capacity` | `50` | `100` | Max burst size (tokens in bucket) |
 | `rate-limit.refill-amount` | `50` | `100` | Tokens refilled per window |
@@ -281,11 +291,18 @@ Change the default password before deploying to any non-local environment.
 ## Running the Service
 
 ```bash
-# Development (H2)
-./mvnw spring-boot:run
+# Development (H2, default)
+./mvnw spring-boot:run -P dev
 
-# Production (PostgreSQL)
-./mvnw spring-boot:run -Dspring-boot.run.profiles=postgres
+# UAT (PostgreSQL fortknox_uat)
+DB_USERNAME=postgres DB_PASSWORD=secret ./mvnw spring-boot:run -P uat
+
+# Production (PostgreSQL fortknox)
+JWT_SECRET=<secret> DB_USERNAME=postgres DB_PASSWORD=secret ./mvnw spring-boot:run -P prod
+
+# Build a deployable JAR
+mvn clean package -P prod -DskipTests
+JWT_SECRET=<secret> java -jar target/zw-0.0.1-SNAPSHOT.jar
 
 # Run the auth flow test
 ./test-auth-flow.sh
