@@ -1,8 +1,8 @@
-# ZW — Auth & API Gateway Service
+# FortKnox — ZW (Auth & API Gateway)
 
-## Overview
+**FortKnox** is a payments-oriented microservices security platform. **ZW** is its authentication and API gateway service — the single public-facing entry point that every external request must pass through before reaching any internal service.
 
-**ZW** is a stateless authentication and API gateway service built with Spring Boot 4. It is the entry point of the **FortKnox** microservices architecture, responsible for:
+ZW handles:
 
 - User registration and identity management
 - JWT-based authentication (access + refresh tokens)
@@ -13,7 +13,7 @@ All downstream microservices trust tokens issued by ZW. They validate the `Autho
 
 ---
 
-## Role in the Microservices Architecture
+## Architecture
 
 ```
                         ┌──────────────────────────────────┐
