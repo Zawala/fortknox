@@ -1,5 +1,7 @@
 # FortKnox — ZW (Auth & API Gateway)
 
+![FortKnox](images/FortKnox.png)
+
 **FortKnox** is a payments-oriented microservices security platform. **ZW** is its authentication and API gateway service — the single public-facing entry point that every external request must pass through before reaching any internal service.
 
 ZW handles:
